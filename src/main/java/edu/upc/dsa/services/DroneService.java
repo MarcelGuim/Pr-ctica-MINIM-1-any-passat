@@ -64,8 +64,8 @@ public class DroneService {
     @Path("/pilot")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response newPiloto(Piloto piloto) {
-
-        if (piloto.getNombre() == null || piloto.getApellidos() == null)  return Response.status(500).entity(piloto).build();
+        if (piloto.getNombre() == null || piloto.getApellidos() == null)
+            return Response.status(500).entity(piloto).build();
         this.Dm.AddPiloto(piloto);
         return Response.status(201).entity(piloto).build();
     }
@@ -81,7 +81,8 @@ public class DroneService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response newDron(Dron dron) {
 
-        if (dron.getNombre() == null || dron.getFabricante() == null || dron.getModelo() == null)  return Response.status(500).entity(dron).build();
+        if (dron.getNombre() == null || dron.getFabricante() == null || dron.getModelo() == null)
+            return Response.status(500).entity(dron).build();
         this.Dm.AddDron(dron);
         return Response.status(201).entity(dron).build();
     }
@@ -117,7 +118,7 @@ public class DroneService {
     }
 
     @POST
-    @ApiOperation(value = "create a new Drone", notes = "asdasd")
+    @ApiOperation(value = "Pon un Dron en Mantenimiento", notes = "asdasd")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response=Dron.class),
             @ApiResponse(code = 500, message = "Validation Error")
@@ -127,7 +128,8 @@ public class DroneService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response DronMantenimiento(Dron dron) {
 
-        if (dron.getNombre() == null || dron.getFabricante() == null || dron.getModelo() == null)  return Response.status(500).entity(dron).build();
+        if (dron.getNombre() == null|| dron.getFabricante() == null || dron.getModelo() == null)
+            return Response.status(500).entity(dron).build();
         this.Dm.PonDronAReparar(dron);
         List<Dron> reparaciones = this.Dm.DameListaReparacion();
         GenericEntity<List<Dron>> entity = new GenericEntity<List<Dron>>(reparaciones) {};
@@ -135,11 +137,10 @@ public class DroneService {
     }
 
     @POST
-    @ApiOperation(value = "create a new Drone", notes = "asdasd")
+    @ApiOperation(value = "Repara un Dron", notes = "asdasd")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response=Dron.class),
             @ApiResponse(code = 500, message = "Validation Error")
-
     })
     @Path("/dron/Reparar")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -151,21 +152,25 @@ public class DroneService {
     }
 
     @POST
-    @ApiOperation(value = "create a new Pilot", notes = "asdasd")
+    @ApiOperation(value = "Crea un Nuevo plan de Vuelo", notes = "asdasd")
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful", response=PlanDeVuelo.class),
             @ApiResponse(code = 500, message = "Validation Error")
-
     })
     @Path("/PlanVuelo")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response newPiloto(PlanDeVuelo plan) {
+    public Response newPlanDeVuelo(PlanDeVuelo plan) {
 
-        if(plan.getIdPiloto() == null || plan.getIdDron() == null || plan.getDia() == 0)
-        this.Dm.AddPlanDeVuelo(plan);
-        List<PlanDeVuelo> PlanesDeDron = this.Dm.DameListaPlanesDron(plan.getIdDron());
-        GenericEntity<List<PlanDeVuelo>> entity = new GenericEntity<List<PlanDeVuelo>>(PlanesDeDron) {};
-        return Response.status(201).entity(entity).build();
+        if(plan.getIdPiloto() == null && plan.getIdDron() == null && plan.getDia() == 0)
+            return Response.status(500).entity(plan).build();
+        PlanDeVuelo planrespuesta = this.Dm.AddPlanDeVuelo(plan);
+        if(planrespuesta == null)
+            return Response.status(500).entity(plan).build();
+        else {
+            List<PlanDeVuelo> PlanesDeDron = this.Dm.DameListaPlanesDron(plan.getIdDron());
+            GenericEntity<List<PlanDeVuelo>> entity = new GenericEntity<List<PlanDeVuelo>>(PlanesDeDron) {};
+            return Response.status(201).entity(entity).build();
+        }
     }
 
 }

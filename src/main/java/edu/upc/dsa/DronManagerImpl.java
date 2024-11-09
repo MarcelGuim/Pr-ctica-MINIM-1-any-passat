@@ -1,5 +1,6 @@
 package edu.upc.dsa;
 
+import edu.upc.dsa.exceptions.NoDroneToRepairException;
 import edu.upc.dsa.models.Dron;
 import edu.upc.dsa.models.Piloto;
 import edu.upc.dsa.models.PlanDeVuelo;
@@ -8,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-public class DronManagerImpl implements DronManager {
+public class DronManagerImpl implements DronManager{
     private static DronManager instance;
     protected List<Dron> drons;
     protected List<Piloto> pilotos;
@@ -25,18 +26,34 @@ public class DronManagerImpl implements DronManager {
 
     public static DronManager getInstance() {
         if (instance==null) instance = new DronManagerImpl();
-        logger.info("insatce created");
+        logger.info("instance created");
         return instance;
     }
-
-    public void AddDron(Dron dron){
-        drons.add(dron);
+    public Dron AddDron(Dron dron){
         logger.info("Drone " +dron+" added");
+        this.drons.add(dron);
+        return dron;
     }
-    public void AddPiloto(Piloto piloto){
-        pilotos.add(piloto);
-        logger.info("Pilot " +piloto+" added");
+    public Dron AddDron(String id, String name, String fabricante, String modelo){
+        return this.AddDron(new Dron(id, name, fabricante,modelo));
     }
+    public Dron AddDron(String name, String fabricante, String modelo){
+        return this.AddDron(null, name,fabricante,modelo);
+    }
+    public Piloto AddPiloto(Piloto piloto){
+        logger.info("Piloto " +piloto+" added");
+        this.pilotos.add(piloto);
+        return piloto;
+    }
+    public Piloto AddPiloto(String id, String nombre, String apellidos){
+        return this.AddPiloto(new Piloto(id, nombre, apellidos));
+
+    }
+    public Piloto AddPiloto(String nombre, String apellidos){
+        return this.AddPiloto(null, nombre,apellidos);
+
+    }
+
     public Piloto getPiloto(String Id){
         for(Piloto piloto: pilotos)
         {
@@ -53,7 +70,7 @@ public class DronManagerImpl implements DronManager {
         }
         return null;
     }
-    public void AddPlanDeVuelo(PlanDeVuelo plan){
+    public PlanDeVuelo AddPlanDeVuelo(PlanDeVuelo plan){
         Piloto piloto = getPiloto(plan.getIdPiloto());
         Dron dron = getDron(plan.getIdDron());
         List<PlanDeVuelo> PlanesDeVueloPiloto = piloto.getLista();
@@ -65,14 +82,16 @@ public class DronManagerImpl implements DronManager {
             {
                 logger.info("No se puede añadir el plan de vuelo "+plan+", el dron esta ocupado" );
                 no = true;
+                return null;
             }
         }
         for(PlanDeVuelo planPiloto: PlanesDeVueloPiloto)
         {
-            if(planPiloto.getIdDron().equals(plan.getIdDron()) && planPiloto.getDia() == plan.getDia())
+            if(planPiloto.getIdPiloto().equals(plan.getIdPiloto()) && planPiloto.getDia() == plan.getDia())
             {
                 logger.info("No se puede añadir el plan de vuelo "+plan+", el piloto esta ocupado" );
                 no = true;
+                return null;
             }
         }
         for(Dron dronR: reparaciones)
@@ -81,6 +100,7 @@ public class DronManagerImpl implements DronManager {
             {
                 logger.info("No se puede añadir el plan de vuelo "+plan+", el dron esta reaparaciones" );
                 no = true;
+                return null;
             }
         }
         if(!no)
@@ -89,10 +109,19 @@ public class DronManagerImpl implements DronManager {
             piloto.addPlanDeVuelo(plan);
             dron.addPlanDeVuelo(plan);
             logger.info("Se ha añadido el plan de vuelo "+plan);
-
+            return plan;
         }
+        else
+            return null;
     }
+    public PlanDeVuelo AddPlanDeVuelo(String id, String IdPiloto, String IdDron, double Dia, double horas, double latOrigen, double longOrigen, double latDest, double longDest){
+        return this.AddPlanDeVuelo(new PlanDeVuelo(id,IdPiloto, IdDron,Dia, horas, latOrigen, longDest, latDest, longDest));
 
+    }
+    public PlanDeVuelo AddPlanDeVuelo(String IdPiloto, String IdDron, double Dia, double horas, double latOrigen, double longOrigen, double latDest, double longDest){
+        return this.AddPlanDeVuelo(null,IdPiloto, IdDron,Dia, horas, latOrigen, longDest, latDest, longDest);
+
+    }
     public  List<Dron> listaDrones(){
         List<Dron> listaOrdenada = drons;
         listaOrdenada.sort(Comparator.comparingDouble(Dron::getHorasVuelo).reversed());
@@ -110,8 +139,14 @@ public class DronManagerImpl implements DronManager {
         logger.info("El Dron: "+dron+" esta en reparaciones");
     }
     public  void ReparaDron(){
-        Dron dron = reparaciones.pop();
-        logger.info("El Dron: "+dron+" esta en reparado");
+        try{
+            Dron dron = reparaciones.pop();
+            logger.info("El Dron: "+dron+" esta en reparado");
+        }
+        catch (Exception ex)
+        {
+            logger.info("No hay drones a reparar");
+        }
     }
     public  List<PlanDeVuelo> DameListaPlanesDron (String id){
         List<PlanDeVuelo> listaRespuesta = new ArrayList<>();
@@ -157,5 +192,17 @@ public class DronManagerImpl implements DronManager {
         int ret = this.planDeVuelo.size();
         logger.info("size Flight Plans " + ret);
         return ret;
+    }
+    @Override
+    public int sizeReparaciones() {
+        int ret = this.reparaciones.size();
+        logger.info("size reparaciones " + ret);
+        return ret;
+    }
+    public void clear() {
+        this.drons.clear();
+        this.pilotos.clear();
+        this.planDeVuelo.clear();
+        this.reparaciones.clear();
     }
 }

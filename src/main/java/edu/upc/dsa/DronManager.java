@@ -9,9 +9,15 @@ import edu.upc.dsa.models.PlanDeVuelo;
 
 import java.util.List;
 public interface DronManager {
-    public void AddDron(Dron dron);
-    public void AddPiloto(Piloto piloto);
-    public void AddPlanDeVuelo(PlanDeVuelo plan);
+    public Dron AddDron(Dron dron);
+    public Dron AddDron(String id, String name, String fabricante, String modelo);
+    public Dron AddDron(String name, String fabricante, String modelo);
+    public Piloto AddPiloto(Piloto piloto);
+    public Piloto AddPiloto(String id, String nombre, String apellidos);
+    public Piloto AddPiloto(String nombre, String apellidos);
+    public PlanDeVuelo AddPlanDeVuelo(PlanDeVuelo plan);
+    public PlanDeVuelo AddPlanDeVuelo(String id, String IdPiloto, String IdDron, double Dia, double horas, double latOrigen, double longOrigen, double latDest, double longDest);
+    public PlanDeVuelo AddPlanDeVuelo(String IdPiloto, String IdDron, double Dia, double horas, double latOrigen, double longOrigen, double latDest, double longDest);
     public List<Dron> listaDrones();
     public  List<Piloto> listaPilotos();
     public void PonDronAReparar(Dron dron);
@@ -21,5 +27,7 @@ public interface DronManager {
     public int sizeDrones();
     public int sizePilots();
     public int sizePlans();
+    public int sizeReparaciones();
     public List<Dron> DameListaReparacion();
+    public void clear();
 }
