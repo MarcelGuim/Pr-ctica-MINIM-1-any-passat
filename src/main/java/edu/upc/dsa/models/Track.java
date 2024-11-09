@@ -7,7 +7,7 @@ public class Track {
     String id;
     String title;
     String singer;
-    static int lastId;
+
 
     public Track() {
         this.setId(RandomUtils.getId());
